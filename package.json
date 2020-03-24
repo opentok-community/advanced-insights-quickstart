@@ -1,0 +1,47 @@
+{
+  "name": "Advanced-Insights-Quick-Start",
+  "version": "0.1.1",
+  "private": false,
+  "dependencies": {
+    "@material-ui/core": "^4.4.1",
+    "@types/react": "^16.9.2",
+    "apollo-cache-inmemory": "^1.6.3",
+    "apollo-client": "^2.6.4",
+    "apollo-link-http": "^1.5.15",
+    "axios": "^0.19.0",
+    "chart.js": "^2.8.0",
+    "dotenv": "^8.1.0",
+    "express": "^4.17.1",
+    "graphql": "^14.5.4",
+    "graphql-tag": "^2.10.1",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.15",
+    "moment": "^2.24.0",
+    "react": "^16.9.0",
+    "react-apollo": "^3.0.1",
+    "react-chartjs-2": "^2.7.6",
+    "react-dom": "^16.9.0",
+    "react-scripts": "3.1.1",
+    "url-join": "^4.0.1"
+  },
+  "scripts": {
+    "start": "concurrently 'npm run server' 'npm run client'",
+    "server": "node server.js",
+    "client": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "concurrently": "^4.0.1"
+  }
+}
