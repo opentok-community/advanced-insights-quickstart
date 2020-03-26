@@ -7,22 +7,20 @@ class SessionSearch extends Component {
         this.state = {
           sessionID: ' '
         };
-        
-        this.searchSession = this.searchSession.bind(this);
         this.handleChange = this.handleChange.bind(this);
       }
     
-    searchSession() {
-        console.log( this.state.sessionID);
-        // this.props.sessionSearched(this.state.sessionID)
-        // (e)=>{this.props.sessionSearched(this.state.sessionID)}
-    }
+    // searchSession() {
+    //     // console.log( this.state.sessionID);
+    //     // this.props.sessionSearched(this.state.sessionID)
+    //     // (e)=>{this.props.sessionSearched(this.state.sessionID)}
+    //     console.log('searchSession', this.state.sessionID);
+    // }
     handleChange({ target }) {
         this.setState({
           [target.name]: target.value
         });
     }
-
 
     render() {
       return (

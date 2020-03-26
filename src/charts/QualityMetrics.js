@@ -2,32 +2,14 @@ import React, { Component } from 'react';
 import gql from 'graphql-tag';
 import { withApollo } from 'react-apollo';
 import { Line } from 'react-chartjs-2';
-import { get, map } from 'lodash';
-import moment from 'moment';
+import 'chartjs-plugin-zoom'
+import { get } from 'lodash';
 import Loading from '../components/Loading';
 import NoResultsFound from '../components/NoResultsFound';
-import { prototype } from 'chart.js';
 
 const apiKey = process.env.REACT_APP_API_KEY;
 
-/* Get all session IDs from the last 10 days */
-const sessionSummariesQuery = gql`
-  {
-    project(projectId: ${apiKey}) {
-      sessionData {
-        sessionSummaries(start: ${moment().subtract(100, 'days')}) {
-          totalCount
-          resources {
-            sessionId
-          }
-        }
-      }
-    }
-  }
-`;
-
-/* Get the publisherMinutes and subscriberMinutes for every session Id within sessionIds */
-// 1_MX40NTMyODc3Mn5-MTU4NDA1NzcwOTU0M35IY09kTjVlaDExQVkvaCtxemNKbkNFWTd-fg
+/* Get the publisherMinutes for the specified session ID */
 const sessionQuery = sessionIds => gql`
 {
   project(projectId: ${apiKey}) {
@@ -37,14 +19,7 @@ const sessionQuery = sessionIds => gql`
         publisherMinutes
         meetings {
           resources {
-            connections{
-							resources{
-                connectionId
-                guid
-              }
-            }
             publishers {
-              totalCount
               resources {
                 stream {
                   streamId
@@ -66,46 +41,61 @@ const sessionQuery = sessionIds => gql`
 }
 `;
 
-
-
-
 class QualityMetrics extends Component {
   constructor(props) {
     super(props);
     this.state = {
       streamChartData: [],
-      loading: true,
+      loading: false,
+      noresults: false,
       sessionID: ' '
     }
+    this.sessionIDText = "Please enter a Session ID"
   }
 
-  getSessions = async () => {
-    const query = { query: sessionSummariesQuery };
-    const results = await this.props.client.query(query);
-    return get(results.data, 'project.sessionData.sessionSummaries.resources', []);
-  }
-
+  // Get the session data 
   getSessionsInfo = async (sessionIds) => {
     const query = { query: sessionQuery(sessionIds) };
     const results = await this.props.client.query(query);
     return get(results.data, 'project.sessionData.sessions.resources', []);
   }
 
-  convertStreamArrayToChartData = (meeting) => {
-    console.log(meeting)
+  async componentDidMount() {
+    this.sessionIDText = "Please enter a Session ID"
+  }
+
+  convertStreamArrayToChartData = (meetings) => {
+
+    if (meetings === undefined || meetings.length === 0) {
+      this.setState({
+        noresults: true
+      });
+    } else{
+      this.setState({
+        noresults: false
+      });
+    }
+
     const colors = ['#66C5CC', '#F6CF71', '#F89C74', '#DCB0F2', '#87C55F',
       '#9EB9F3', '#FE88B1', '#C9DB74', '#8BE0A4', '#B497E7', '#D3B484', '#B3B3B3'];
     let colorIndex = 0;
-    const publisherArray = get(meeting, 'publishers.resources', []);
-    const chartData = publisherArray.reduce((acc, streamData) => {
+
+    const publisherArray = meetings.map(meeting => get(meeting, 'publishers.resources', []))
+    const publisherArrayFlat = publisherArray.flat()
+
+    const chartData = publisherArrayFlat.reduce((acc, streamData) => {
+
       const streamStatsArray = get(streamData, 'streamStatsCollection.resources', []);
       // Discard short publishers
       if (streamStatsArray.length < 3) {
         return acc;
       }
       const color = colors[colorIndex % colors.length];
+
       colorIndex++;
+
       const shortStreamId = streamData.stream.streamId.substring(0, 8);
+
       const chartData = {
         borderColor: color,
         fill: false,
@@ -125,54 +115,48 @@ class QualityMetrics extends Component {
     }, []);
     return chartData;
   }
+
+  async componentDidUpdate(prevProps) {
+
+    // Check if a new search was made
+    if (prevProps.sessionID !== this.props.sessionID){
+
+      // Remove any spaces in SessionID
+      var newSessionID = this.props.sessionID.replace(/\s/g, '');
+      this.sessionIDText = "Session ID: "+newSessionID
+
+      // Show Loading when searching for session ID
+      this.setState({
+        loading: true,
+      });
+
+      // Get information per session, Note: this returns an array of session data
+      const sessionsInfo = await this.getSessionsInfo(`"${newSessionID}"`);
+      const meetingArray = get(sessionsInfo[0], 'meetings.resources', []);
+
+      // Create an array of meetings per specified session ID
+      let meetings = [];
+      meetingArray.forEach(meeting => {
+        meetings.push(meeting) 
+      });
+
+      const streamChartData = this.convertStreamArrayToChartData(meetings);
+
+      this.setState({
+        streamChartData,
+        loading: false,
+      });
+    }
+  }
   
 
-
-  async componentDidMount() {
-    console.log(this.state.sessionID)
-
-    // if (this.state.sessionID === ' ') return(
-    //   console.log("No session ID")
-    // )
-    console.log(this.state.sessionID)
-
-    let sessionIds = map(await this.getSessions(), (session) => `"${session.sessionId}"`);
-    const sessionsInfo = await this.getSessionsInfo(sessionIds);
-
-    // Find the meeting that has the largest number of stream statistics
-    let meetingWithMostStats = {};
-    let largestStatsCount = 0;
-    sessionsInfo.forEach(sessionInfo => {
-      const meetingArray = get(sessionInfo, 'meetings.resources', []);
-
-      meetingArray.forEach(meeting => {
-        let statsCount = 0;
-        const publisherArray = get(meeting, 'publishers.resources', []);
-        publisherArray.forEach(pubResources => {
-          statsCount += get(pubResources, 'streamStatsCollection.resources.length', 0);
-        });
-        if (statsCount > largestStatsCount) {
-          meetingWithMostStats = meeting;
-          largestStatsCount = statsCount;
-        }
-      });
-    });
-    const streamChartData = this.convertStreamArrayToChartData(meetingWithMostStats);
-
-    this.setState({
-      streamChartData,
-      loading: false,
-    });
-  }
-
   render() {
-    // if (this.state.sessionID === ' ') return <NoResultsFound />
-    // else if (this.state.loading) return <Loading />;
     if (this.state.loading) return <Loading />;
+    if (this.state.noresults) return <NoResultsFound />;
 
     return (       
         <div>
-        <p>{this.props.sessionID}</p>
+        <p>{this.sessionIDText}</p>
         <Line
           data={{
             datasets: this.state.streamChartData
@@ -189,14 +173,27 @@ class QualityMetrics extends Component {
                 type: 'time',
                 distribution: 'linear',
                 time: {
-                  unit: 'hour',
+                  unit: 'minute',
+                  stepSize: 15,
+                  distribution: 'series',
                   displayFormats: {
-                    minute: 'MMM D, hh:mm:ss'
+                    minute: 'MMM DD, hh:mm'
                   }
                 },
               }]
-            }}
-          }
+            },
+            pan: {
+              enabled: true,
+              mode: 'x'   
+            },
+            zoom: {
+              enabled: true,         
+              mode: 'x'
+            },
+            responsive: true
+
+          }}
+          
         />
         </div>
     );

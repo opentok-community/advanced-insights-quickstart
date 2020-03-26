@@ -19,7 +19,6 @@ class App extends Component {
 		this.setState({
       sessionID: e
     });
-    console.log(this.state.sessionID)
   }
   
   render() {
@@ -30,7 +29,7 @@ class App extends Component {
         </SearchContainer>
 
         <ChartContainer titleIcon="area" title="Quality Metrics">
-          <QualityMetrics key={this.state.sessionID} />
+          <QualityMetrics sessionID={this.state.sessionID}/>
         </ChartContainer>
       </div>
     );
