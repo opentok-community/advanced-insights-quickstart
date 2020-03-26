@@ -5,7 +5,7 @@ class SessionSearch extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          sessionID: ' '
+          sessionID: ''
         };
         this.handleChange = this.handleChange.bind(this);
       }
