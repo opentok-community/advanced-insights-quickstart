@@ -94,12 +94,12 @@ class QualityMetrics extends Component {
 
       colorIndex++;
 
-      const shortStreamId = streamData.stream.streamId.substring(0, 8);
+      const streamID = streamData.stream.streamId
 
       const chartData = {
         borderColor: color,
         fill: false,
-        label: `Stream ${shortStreamId}...`,
+        label: `Stream ${streamID}`,
         data: streamStatsArray.reduce((acc, streamStats) => {
             // Discard stats anomolously large bitrates
             if (streamStats.videoBitrateKbps > 1000) {
