@@ -1,5 +1,6 @@
 # Advanced Insights Quickstart
-Getting started with Advanced Insights by building a quality metrics chart for a specific session
+Get started with Advanced Insights by building a quality metrics chart for a specific session
+This project provides an example of a dashboard built which allows the user to search for a specific session ID and return a graph showing publisher video bitrate by stream over time. 
 
 ## Local Installation
 
@@ -34,5 +35,56 @@ Notice that all the environment variables used by the client start with `REACT_A
 This ensures that only those are accessible by the client, protecting your API secret.
 
 ## Quality Metrics Chart
+A publisher bitrate chart similar to the component that can be found on the Inspector Tool.
+<img alt="Publisher video bitrate chart" src="screenshots/Publisher_Bitrate_Chart.png" />
+
+#### Query for getting publisher video bitrate by stream
+```
+{
+  project(projectId: ${apiKey}) {
+   sessionData {
+    sessions(sessionIds: [${sessionIds}]) {
+      resources {
+        meetings {
+          resources {
+            publishers {
+              resources {
+                stream {
+                  streamId
+                }
+                streamStatsCollection {
+                  resources {
+                    videoBitrateKbps
+                    createdAt
+                  }
+                }
+              }
+            }
+          }
+        }
+      }  
+    }
+   }
+  }
+}
+```
+See our [developer documentation](https://tokbox.com/developer/guides/insights/#obtaining-session-data-advanced-insights-) for more information on Advanced Insights queries. 
+
+## Getting Help
+
+We love to hear from you so if you have questions, comments or find a bug in the project, let us know! You can either:
+
+- Open an issue on this repository
+- Tweet at us! We're [@NexmoDev on Twitter](https://twitter.com/NexmoDev)
+- Or [join the Nexmo Community Slack](https://developer.nexmo.com/community/slack)
+
+## Further Reading
+
+- Other Advanced Insights resources: [Using Apollo to Query GraphQL from Node.js](https://www.nexmo.com/blog/2020/03/12/using-apollo-to-query-graphql-from-node-js-dr)
+- [Developer documentation for Insights and Advanced Insights](https://tokbox.com/developer/guides/insights)
+- Check out the Vonage Video Developer Documentation at <https://tokbox.com/developer/>
+
+
+
 
 
