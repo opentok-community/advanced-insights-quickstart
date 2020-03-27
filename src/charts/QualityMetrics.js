@@ -16,7 +16,6 @@ const sessionQuery = sessionIds => gql`
    sessionData {
     sessions(sessionIds: [${sessionIds}]) {
       resources {
-        publisherMinutes
         meetings {
           resources {
             publishers {
