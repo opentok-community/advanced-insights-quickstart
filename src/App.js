@@ -9,25 +9,20 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-    	sessionID : ' '
+    	sessionID : ''
     }
   }
 
-
-  setSessionID(e){
-    // let ele=e.target;
-		this.setState({
-      sessionID: e
-    });
+  setSessionID = (sessionID) => {
+    this.setState({ sessionID });
   }
   
   render() {
     return (
       <div className="App">
         <SearchContainer>
-          <SessionSearch sessionSearched={this.setSessionID.bind(this)}/>
+          <SessionSearch sessionSearched={this.setSessionID}/>
         </SearchContainer>
-
         <ChartContainer titleIcon="area" title="Quality Metrics">
           <QualityMetrics sessionID={this.state.sessionID}/>
         </ChartContainer>
