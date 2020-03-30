@@ -1,20 +1,15 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-class ChartContainer extends Component {
-  render() {
-    return (
-      <div className="card">
-        <div className="card-header">
-          <i className={`fas fa-chart-${this.props.titleIcon}`}></i> {
-            this.props.title
-          }
-        </div>
-        <div className="card-body">
-          {this.props.children}
-        </div>
-      </div>
-    );
-  }
-}
+const ChartContainer = (props) =>
+  <div className="card">
+    <div className="card-header">
+      <i className={`fas fa-chart-${props.titleIcon}`}></i> {
+        props.title
+      }
+    </div>
+    <div className="card-body">
+      {props.children}
+    </div>
+  </div>;
 
 export default ChartContainer;

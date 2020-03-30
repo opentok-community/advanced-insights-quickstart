@@ -47,9 +47,9 @@ class QualityMetrics extends Component {
       streamChartData: [],
       loading: false,
       noresults: false,
-      sessionID: ' '
+      sessionID: ''
     }
-    this.sessionIDText = "Please enter a Session ID"
+    this.sessionIDText = 'Please enter a Session ID';
   }
 
   // Get the session data 
@@ -59,56 +59,46 @@ class QualityMetrics extends Component {
     return get(results.data, 'project.sessionData.sessions.resources', []);
   }
 
-  async componentDidMount() {
-    this.sessionIDText = "Please enter a Session ID"
+  componentDidMount() {
+    this.sessionIDText = 'Please enter a Session ID';
   }
 
   convertStreamArrayToChartData = (meetings) => {
-
-    if (meetings === undefined || meetings.length === 0) {
-      this.setState({
-        noresults: true
-      });
-    } else{
-      this.setState({
-        noresults: false
-      });
-    }
+    this.setState({
+      noresults: !meetings || meetings.length === 0
+    });
 
     const colors = ['#66C5CC', '#F6CF71', '#F89C74', '#DCB0F2', '#87C55F',
       '#9EB9F3', '#FE88B1', '#C9DB74', '#8BE0A4', '#B497E7', '#D3B484', '#B3B3B3'];
     let colorIndex = 0;
 
-    const publisherArray = meetings.map(meeting => get(meeting, 'publishers.resources', []))
-    const publisherArrayFlat = publisherArray.flat()
+    const publisherArray = meetings.map(meeting => get(meeting, 'publishers.resources', []));
+    const publisherArrayFlat = publisherArray.flat();
 
     const chartData = publisherArrayFlat.reduce((acc, streamData) => {
-
       const streamStatsArray = get(streamData, 'streamStatsCollection.resources', []);
       // Discard short publishers
       if (streamStatsArray.length < 3) {
         return acc;
       }
       const color = colors[colorIndex % colors.length];
-
       colorIndex++;
-
-      const streamID = streamData.stream.streamId
+      const streamID = streamData.stream.streamId;
 
       const chartData = {
         borderColor: color,
         fill: false,
         label: `Stream ${streamID}`,
         data: streamStatsArray.reduce((acc, streamStats) => {
-            // Discard stats anomolously large bitrates
-            if (streamStats.videoBitrateKbps > 1000) {
-              return acc;
-            }
-            return acc.concat({
-              x: streamStats.createdAt,
-              y: streamStats.videoBitrateKbps,
-            })
-          }, []),
+          // Discard stats anomolously large bitrates
+          if (streamStats.videoBitrateKbps > 1000) {
+            return acc;
+          }
+          return acc.concat({
+            x: streamStats.createdAt,
+            y: streamStats.videoBitrateKbps,
+          })
+        }, []),
       };
       return acc.concat(chartData)
     }, []);
@@ -118,11 +108,11 @@ class QualityMetrics extends Component {
   async componentDidUpdate(prevProps) {
 
     // Check if a new search was made
-    if (prevProps.sessionID !== this.props.sessionID){
+    if (prevProps.sessionID !== this.props.sessionID) {
 
       // Remove any spaces in SessionID
       var newSessionID = this.props.sessionID.replace(/\s/g, '');
-      this.sessionIDText = "Session ID: "+newSessionID
+      this.sessionIDText = `Session ID: ${newSessionID}`;
 
       // Show Loading when searching for session ID
       this.setState({
@@ -147,19 +137,16 @@ class QualityMetrics extends Component {
       });
     }
   }
-  
 
   render() {
     if (this.state.loading) return <Loading />;
     if (this.state.noresults) return <NoResultsFound />;
 
     return (       
-        <div>
+      <div>
         <p>{this.sessionIDText}</p>
         <Line
-          data={{
-            datasets: this.state.streamChartData
-          }}
+          data={{ datasets: this.state.streamChartData }}
           options={{
             scales: {
               yAxes: [{
@@ -190,11 +177,9 @@ class QualityMetrics extends Component {
               mode: 'x'
             },
             responsive: true
-
           }}
-          
         />
-        </div>
+      </div>
     );
   }
 }
